@@ -1,0 +1,62 @@
+# RAG & Memory Configuration
+
+databases:
+  private:
+    path: "~/.llm_engine/vector_db/private"
+    enable: true
+  public:
+    path: "~/.llm_engine/vector_db/public"
+    enable: true
+    read_only: true
+
+embedding:
+  model: "Qwen/Qwen3-Embedding-0.6B"
+  dimension: 1024
+  lazy_load: true
+  device: "cuda"
+  batch_size: null  # null = auto-detect
+  cpu_batch_size: 16
+  gpu_batch_size: 64
+  normalize_embeddings: true
+
+reranking:
+  enable: true
+  model: "ibm-granite/granite-embedding-reranker-english-r2" # 
+  lazy_load: true
+
+retrieval:
+  top_k: 10
+  enable_parallel_search: true
+  private_weight: 0.6
+  public_weight: 0.4
+
+# Collection routing - which collections to query for different tasks
+collections:
+  document_summarization:
+    private: ["semantic"]
+    public: []
+  
+  debugging:
+    private: ["episodic", "semantic"]
+    public: ["debugging", "containers", "security"]
+  
+  general_qa:
+    private: ["documents", "semantic"]
+    public: ["best_practices"]
+
+memory:
+  enable_episodic: true
+  enable_semantic: true
+  auto_save_threshold: 0.7
+
+interactive_mode:
+  save_interactions: "ask"
+  prompt_message: "💾 Save this for future reference? [y/n]: "
+
+autonomous_mode:
+  save_interactions: "always"
+
+qa_engine:
+  enable: true
+  default_top_k: 5
+  min_confidence: 0.3

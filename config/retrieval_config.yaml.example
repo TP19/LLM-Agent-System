@@ -1,0 +1,63 @@
+# Retrieval Configuration Template
+# Copy this file to retrieval_config.yaml
+
+# Quality modes configuration
+quality_modes:
+  fast:
+    initial_k: 10
+    final_k: 5
+    use_context: false
+    use_reranking: false
+    timeout_seconds: 5
+    description: "Quick results, good enough for simple questions"
+
+  balanced:
+    initial_k: 20
+    final_k: 10
+    use_context: true
+    use_reranking: false
+    timeout_seconds: 10
+    description: "Balance between speed and accuracy (recommended)"
+
+  accurate:
+    initial_k: 50
+    final_k: 20
+    use_context: true
+    use_reranking: true
+    timeout_seconds: 20
+    description: "Thorough search with verification"
+
+  thorough:
+    initial_k: 100
+    final_k: 50
+    use_context: true
+    use_reranking: true
+    timeout_seconds: 60
+    description: "Comprehensive multi-document analysis"
+
+# Embedding model configuration
+embedding:
+  default_model: "all-MiniLM-L6-v2"  # Fast, 384 dims
+  accurate_model: "all-mpnet-base-v2"  # Better, 768 dims
+  use_accurate_for: ["accurate", "thorough"]
+
+# Retrieval parameters
+retrieval:
+  default_quality: "balanced"
+  max_chunks_per_query: 50
+  min_similarity_score: 0.5
+  context_window: 1
+
+# Answer generation
+answer_generation:
+  max_context_chunks: 10
+  max_tokens: 800
+  temperature: 0.3
+  top_p: 0.9
+
+# Source citation
+sources:
+  max_sources_display: 10
+  show_scores: true
+  show_metadata: true
+  content_preview_length: 150

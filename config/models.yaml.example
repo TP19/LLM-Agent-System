@@ -1,0 +1,46 @@
+# Model Configuration Template
+# Copy this file to models.yaml and update with your model paths
+
+models:
+  executor:
+    model_path: "/path/to/your/model.gguf"  # 8B instruction model
+    n_ctx: 4096
+    n_gpu_layers: 5
+    verbose: false
+
+  security:
+    model_path: "/path/to/your/model.gguf"
+    n_ctx: 16384
+    n_gpu_layers: 5
+    verbose: false
+
+  triage:
+    model_path: "/path/to/your/model.gguf"
+    n_ctx: 16384
+    n_gpu_layers: 5
+    verbose: false
+
+  coder:
+    model_path: "/path/to/your/coder-model.gguf"  # Code-specialized model
+    n_gpu_layers: 7
+    n_ctx: 16384
+
+  summarization:
+    model_path: "/path/to/your/model.gguf"
+    n_gpu_layers: 10
+    n_ctx: 8192
+    enable_rag: true
+
+  knowledge:
+    model_path: "/path/to/your/model.gguf"
+    n_ctx: 8192
+    n_gpu_layers: 7
+    verbose: false
+    temperature: 0.3
+    top_p: 0.9
+    repeat_penalty: 1.1
+
+settings:
+  command_timeout: 30
+  enable_follow_up: true
+  max_collaboration_cycles: 3
