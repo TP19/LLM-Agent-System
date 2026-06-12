@@ -1,0 +1,52 @@
+# LLM-Agent-System Dependencies
+
+# Core LLM and Model Loading
+# Note: llama-cpp-python is NOT listed here - it's installed separately
+# in install.py stage 3 with proper GPU support (CUDA/Metal/ROCm).
+# Installing it here would compile CPU-only and waste time.
+transformers>=4.30.0
+torch>=2.0.0
+
+# Embeddings and Reranking
+sentence-transformers>=2.2.0
+huggingface-hub>=0.19.0  # For downloading GGUF models
+
+# Vector Database
+lancedb>=0.3.0   # Production backend (high-level API)
+pylance>=0.10.0  # Underlying Lance dataset reader — needed by manage_rag inspect/stats
+pyarrow>=14.0.0  # Required by LanceDB
+
+# Terminal UI
+rich>=13.0.0
+pynput>=1.7.0    # Keyboard handling for the rich chunk viewer (Knowledge agent)
+
+# Configuration
+pyyaml>=6.0
+
+# System Monitoring
+psutil>=5.9.0
+GPUtil>=1.4.0
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0   # Used by manage_rag for inspect output formatting
+
+# File Monitoring
+watchdog>=3.0.0
+
+# Data Validation
+pydantic>=2.0.0
+
+# Testing (development)
+pytest>=7.4.0
+
+# Document ingestion for the Knowledge agent
+# (audio/video/image processors were removed in v0.2 — only text-shaped
+# documents are supported by the public RAG pipeline.)
+PyPDF2>=3.0.0                 # PDF text extraction
+pdfplumber>=0.9.0             # Advanced PDF (tables, layout-preserving)
+Pillow>=10.0.0                # Pulled in transitively by PDF/imaging stacks
+ebooklib>=0.18                # EPUB reading
+beautifulsoup4>=4.12.0        # Required by ebooklib to extract text from EPUB HTML
+python-docx>=1.0.0            # DOCX reading
+openpyxl>=3.1.0               # XLSX reading/writing

@@ -1,0 +1,56 @@
+# Enhanced Summarization Configuration
+# Used by EnhancedSummarizationAgent for book/document summarization
+
+# Default style for different document types
+styles:
+  default: narrative          # Default for unknown types
+  books: narrative            # Novels, stories
+  academic: academic          # Research papers, academic texts
+  technical: technical        # Documentation, manuals
+  quick: quick                # Fast bullet-point summaries
+
+# Compression level presets
+compression:
+  default: standard           # 10% - balanced
+  detailed: 0.20              # 20% - keep most detail
+  standard: 0.10              # 10% - balanced (default)
+  condensed: 0.05             # 5% - key points only
+  outline: 0.02               # 2% - bare minimum
+
+# Processing settings
+processing:
+  max_concurrent_chapters: 3  # Parallel chapter processing
+  max_content_tokens: 6000    # Threshold for hierarchical chunking
+  excerpt_max_tokens: 2000     # Running excerpt size for context
+  use_rolling_context: true   # Pass context between chunks
+
+# Output settings
+output:
+  directory: "summaries"      # Where to save summaries
+  formats:
+    - markdown                # Generate markdown
+    - pdf                     # Generate PDF
+    - epub                    # Generate EPUB
+  include_metadata: true      # Add YAML frontmatter to markdown
+
+# File type mappings
+file_types:
+  books:
+    - .epub
+    - .mobi
+    - .fb2
+  documents:
+    - .pdf
+    - .docx
+    - .doc
+  data:
+    - .xlsx
+    - .xls
+  text:
+    - .txt
+    - .md
+
+# Integration settings
+integration:
+  save_to_rag: true           # Store summaries in RAG for Knowledge Agent
+  rag_collection: "book_summaries"

@@ -1,0 +1,88 @@
+# Coder Agent Prompts
+# Used for software development and code generation
+
+system_prompt: |
+  You are a coder agent that assists with software development tasks.
+
+  Your responsibilities:
+  - Write clean, maintainable code
+  - Follow best practices and design patterns
+  - Include proper error handling
+  - Add clear comments and documentation
+  - Consider edge cases and security
+
+  Always explain your code and design decisions.
+
+code_generation_prompt: |
+  Generate code for this requirement:
+
+  Requirement: {requirement}
+  Language: {language}
+  Context: {context}
+
+  Provide:
+  1. Well-commented code
+  2. Explanation of approach
+  3. Usage examples
+  4. Potential edge cases to consider
+
+code_review_prompt: |
+  Review this code for quality and issues:
+
+  Code: {code}
+  Language: {language}
+
+  Provide a JSON response:
+  {{
+    "issues": [
+      {{
+        "severity": "critical|major|minor",
+        "type": "bug|security|style|performance",
+        "description": "what's wrong",
+        "suggestion": "how to fix it",
+        "line_number": 10
+      }}
+    ],
+    "positive_aspects": ["things done well"],
+    "overall_assessment": "summary of code quality"
+  }}
+
+debugging_prompt: |
+  Help debug this issue:
+
+  Code: {code}
+  Error: {error}
+  Expected Behavior: {expected}
+  Actual Behavior: {actual}
+
+  Provide:
+  1. Root cause analysis
+  2. Fixed code with explanations
+  3. Test cases to verify the fix
+  4. Prevention strategies
+
+refactoring_prompt: |
+  Refactor this code to improve it:
+
+  Code: {code}
+  Goals: {goals}
+
+  Provide:
+  1. Refactored code
+  2. Explanation of improvements
+  3. Before/after comparison
+  4. Migration notes if needed
+
+architecture_design_prompt: |
+  Design the architecture for this system:
+
+  Requirements: {requirements}
+  Constraints: {constraints}
+  Scale: {scale}
+
+  Provide:
+  1. High-level architecture diagram (text description)
+  2. Component breakdown
+  3. Technology recommendations
+  4. Design patterns to use
+  5. Potential challenges and solutions

@@ -1,0 +1,76 @@
+# Executor/Operator Agent Prompts
+# Used for system operations and command execution
+
+system_prompt: |
+  You are an executor agent that performs system operations and runs commands.
+
+  Your responsibilities:
+  - Execute commands safely and efficiently
+  - Provide clear feedback on operation status
+  - Handle errors gracefully
+  - Suggest next steps based on results
+
+  Always explain what you're doing and why.
+
+execution_plan_prompt: |
+  Create an execution plan for this request:
+
+  Request: {request}
+  Security Analysis: {security_analysis}
+
+  Provide a JSON execution plan:
+  {{
+    "steps": [
+      {{
+        "action": "command or operation",
+        "command": "actual command to run",
+        "purpose": "why this step is needed",
+        "risk_level": "low|medium|high"
+      }}
+    ],
+    "expected_outcome": "what should happen",
+    "rollback_plan": "how to undo if needed"
+  }}
+
+command_generation_prompt: |
+  Generate appropriate commands for this task:
+
+  Task: {task}
+  Constraints: {constraints}
+  Environment: {environment}
+
+  Provide commands with explanations:
+  {{
+    "commands": [
+      {{
+        "command": "actual command",
+        "explanation": "what it does",
+        "alternatives": ["alternative approaches"]
+      }}
+    ],
+    "notes": "important considerations"
+  }}
+
+error_analysis_prompt: |
+  Analyze this error and suggest fixes:
+
+  Command: {command}
+  Error: {error}
+  Exit Code: {exit_code}
+
+  Provide analysis:
+  {{
+    "error_type": "category of error",
+    "root_cause": "underlying issue",
+    "fixes": ["suggested solutions"],
+    "prevention": "how to avoid this in future"
+  }}
+
+result_summary_prompt: |
+  Summarize the execution results:
+
+  Commands Executed: {commands}
+  Results: {results}
+  Status: {status}
+
+  Provide a clear summary of what was accomplished and next steps if any.

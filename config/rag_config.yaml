@@ -1,0 +1,234 @@
+# RAG & Memory Configuration
+
+databases:
+  backend: "lancedb"
+
+  private:
+    path: "~/.llm_engine/lance_db/private"
+    enable: true
+  public:
+    path: "~/.llm_engine/lance_db/public"
+    enable: true
+    read_only: true
+
+embedding:
+  # Model can be a HuggingFace identifier or a local GGUF path.
+  # Auto-detects format based on .gguf extension.
+  #
+  # FIRST-RUN NOTE: the default Qwen3-Embedding-0.6B downloads ~1.2 GB from
+  # HuggingFace the first time the Knowledge or Summarization agent runs
+  # (fp16 safetensors), and caches it under ~/.cache/huggingface/.
+  # After that it's fully offline.
+  # For a fully-offline install from the start, point this at a local GGUF
+  # you already have (the GGUF backend uses your llama-server, no HF needed).
+  #
+  # Examples:
+  #   model: "Qwen/Qwen3-Embedding-0.6B"              # HuggingFace (default)
+  #   model: "~/.llm_engine/models/gguf/nomic-embed-text-v1.5.Q8_0.gguf"  # local GGUF
+  model: "Qwen/Qwen3-Embedding-0.6B"
+
+  dimension: 1024  # Auto-detected for GGUF models (nomic = 1024, jina v4 = 2048)
+  lazy_load: true
+  device: "cpu"  # For HuggingFace models only (GGUF uses n_gpu_layers below)
+  batch_size: null  # null = auto-detect
+  cpu_batch_size: 4  # Reduced to avoid exceeding server batch_size (4 chunks × 512 tokens = 2048 max)
+  gpu_batch_size: 8  # Conservative for GPU as well
+  normalize_embeddings: true
+
+  # Backend for GGUF models (ignored for HuggingFace models)
+  # - auto: Try llama-cpp-python first, fallback to llama-server on failure (recommended for dual-backend support)
+  # - llama-cpp-python: Use llama-cpp-python only
+  # - llama-server: Use llama-server only
+  backend: "auto"  # Auto-fallback to llama-server if llama-cpp-python incompatible
+
+  # GGUF-specific settings (for GGUF models only)
+  # NOTE: For GPU acceleration, make sure llama-cpp-python is compiled with CUDA support
+  gguf:
+    n_ctx: 2048  # Context window - increased to handle larger chunks
+    n_threads: 4  # CPU threads for processing
+    n_batch: 2048  # Batch size - MUST be >= n_ctx for embedding mode to handle long texts
+    n_gpu_layers: 99  # GPU acceleration: 0=CPU only, 99=all layers (recommended for GPU)
+    use_mlock: false  # Lock model in RAM (prevents swapping)
+    use_mmap: true  # Use memory mapping (faster loading)
+    # llama_server_path: ""  # Auto-detected by default. To override, uncomment and
+    #                        # set to the binary path, or use $LLM_ENGINE_LLAMA_SERVER.
+    server_port: 8081  # Port for llama-server (for backend='llama-server' or 'auto' fallback)
+
+reranking:
+  # Disabled by default so first-run is fast and fully local-friendly.
+  # When enabled, the configured model is downloaded from HuggingFace on first
+  # use (~1.2 GB for the default IBM Granite reranker). Set enable: true and
+  # either accept the HF download or point `model:` at a local GGUF file.
+  enable: false
+  # Model can be a HuggingFace identifier or a local GGUF path.
+  # Examples:
+  #   model: "ibm-granite/granite-embedding-reranker-english-r2"   # HuggingFace
+  #   model: "~/.llm_engine/models/gguf/jina-reranker-v3-Q4_K_M.gguf"  # local GGUF
+  model: "ibm-granite/granite-embedding-reranker-english-r2"
+  lazy_load: true
+
+  # GGUF-specific settings (for GGUF models only)
+  gguf:
+    n_ctx: 2048  # Context window - increased to handle larger chunks
+    n_threads: 4  # CPU threads for processing
+    n_batch: 2048  # Batch size - MUST be >= n_ctx for embedding mode to handle long texts
+    n_gpu_layers: 99  # GPU acceleration: 0=CPU only, 99=all layers (recommended for GPU)
+    # llama_server_path: ""  # Auto-detected by default. To override, uncomment and
+    #                        # set to the binary path, or use $LLM_ENGINE_LLAMA_SERVER.
+    server_port: 8082  # Port for llama-server (different from embedding server on 8081)
+
+retrieval:
+  top_k: 10
+  enable_parallel_search: true
+  private_weight: 0.6
+  public_weight: 0.4
+
+# Collection routing - which collections to query for different tasks
+collections:
+  document_summarization:
+    private: ["semantic"]
+    public: []
+  
+  debugging:
+    private: ["episodic", "semantic"]
+    public: ["debugging", "containers", "security"]
+  
+  general_qa:
+    private: ["documents", "semantic"]
+    public: ["best_practices"]
+
+memory:
+  enable_episodic: true
+  enable_semantic: true
+  auto_save_threshold: 0.7
+
+# ============================================================================
+# Adaptive Chunking Configuration
+# ============================================================================
+chunking:
+  # Enable adaptive, content-aware chunking
+  enabled: true
+  adaptive: true  # Auto-detect code vs text and use appropriate strategy
+
+  # Chunk size settings (in tokens)
+  target_size: 256      # Aim for this size (sweet spot for most content)
+  max_size: 512         # Hard limit (never exceed this)
+  min_size: 128          # Minimum chunk size
+  overlap_tokens: 0    # Overlap between chunks for context
+
+  # Safety margins: Cut before hitting max_size
+  # If max_size=4096 and safety_margin=0.85, cut at ~3686 tokens
+  safety_margin_min: 0.80  # Minimum: cut at 80% of max (3276 for 4096)
+  safety_margin_max: 0.90  # Maximum: cut at 90% of max (3686 for 4096)
+
+  # Content type detection
+  auto_detect: true      # Auto-detect code vs text
+  force_type: null       # Override: 'code' | 'text' | null (auto)
+
+  # Text-specific settings
+  text:
+    prefer_paragraphs: true         # Try to keep paragraphs together
+    preserve_structure: true        # Respect document structure
+    # Patterns that indicate sentence boundaries
+    sentence_boundary_patterns:
+      - '\. '    # Period followed by space
+      - '\.\n'   # Period at end of line
+      - '! '     # Exclamation followed by space
+      - '?\n'    # Question mark at end of line
+
+  # Code-specific settings
+  code:
+    preserve_functions: true        # Keep functions together when possible
+    split_large_functions: true     # Split if function > max_function_size
+    max_function_size: 8192         # Max tokens for a single function
+
+    # Patterns where it's safe to cut code
+    safe_cut_patterns:
+      - '\}\n'         # After closing brace
+      - ';\n'          # After statement
+      - '\]\n'         # After closing bracket
+      - '^\n\n'        # Blank line (paragraph break)
+
+    # Patterns to avoid when cutting (mid-expression, mid-variable)
+    avoid_cut_patterns:
+      - ' = '          # Mid-assignment
+      - '\('           # Mid-function call
+      - '\['           # Mid-array access
+      - ',\s*$'        # Mid-argument list
+
+  # Language-specific overrides
+  languages:
+    python:
+      enabled: true
+      use_ast: true              # Use AST for perfect function boundaries
+      preserve_imports: true     # Include imports in chunks
+
+    c:
+      enabled: true
+      detect_functions: true     # Detect function boundaries
+      preserve_includes: true    # Include #include statements
+
+    cpp:
+      enabled: true
+      detect_functions: true
+      preserve_includes: true
+      preserve_namespaces: true  # Keep namespace context
+
+    javascript:
+      enabled: true
+      detect_functions: true
+      preserve_imports: true
+
+    markdown:
+      enabled: true
+      prefer_sections: true      # Chunk at section headers (##)
+      preserve_headers: true     # Include headers in chunks
+
+    text:
+      enabled: true
+      prefer_paragraphs: true    # Keep paragraphs together
+
+interactive_mode:
+  save_interactions: "ask"
+  prompt_message: "💾 Save this for future reference? [y/n]: "
+
+autonomous_mode:
+  save_interactions: "always"
+
+qa_engine:
+  enable: true
+  default_top_k: 5
+  min_confidence: 0.3
+
+# ============================================================================
+# Multimodal Processing Configuration
+# ============================================================================
+multimodal:
+  # Audio processing (Whisper-based transcription)
+  audio:
+    whisper_model: "base"  # tiny|base|small|medium|large
+    device: "cpu"          # cuda|cpu (use cuda if GPU available)
+    language: "auto"       # auto-detect or specify language code (e.g., 'en', 'es')
+    chunk_length: 30       # seconds per chunk for long audio
+
+  # PDF processing
+  pdf:
+    preserve_layout: true   # Preserve text layout
+    extract_tables: true    # Extract tables in markdown format
+    extract_images: false   # Extract images (future enhancement)
+
+  # Video processing
+  video:
+    frame_interval: 1.0     # Extract frame every N seconds
+    max_frames: 100         # Maximum frames to process
+    ocr_enabled: true       # Enable OCR on extracted frames
+    ocr_language: "eng"     # Tesseract language code
+    save_frames: false      # Keep extracted frames after processing
+    extract_audio: false    # Extract and transcribe audio track
+
+  # Image processing (OCR)
+  image:
+    language: "eng"         # Tesseract language code
+    auto_rotate: true       # Auto-rotate for better OCR
+    psm: 3                  # Page segmentation mode (3=automatic)
+    oem: 3                  # OCR Engine mode (3=LSTM)

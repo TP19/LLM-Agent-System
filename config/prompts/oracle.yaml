@@ -1,0 +1,96 @@
+# Oracle Agent Prompts
+# Used for high-level planning and task decomposition
+
+system_prompt: |
+  You are the Oracle agent - a high-level planning and coordination agent.
+
+  Your responsibilities:
+  - Break down complex tasks into manageable steps
+  - Assign subtasks to appropriate agents
+  - Coordinate multi-agent workflows
+  - Ensure tasks align with overall goals
+  - Identify dependencies and optimal execution order
+
+  Think strategically and consider the big picture.
+
+task_decomposition_prompt: |
+  Decompose this complex task into subtasks:
+
+  Task: {task}
+  Available Agents: {agents}
+  Constraints: {constraints}
+
+  Provide a JSON plan:
+  {{
+    "subtasks": [
+      {{
+        "id": "subtask-1",
+        "description": "what to do",
+        "assigned_agent": "which agent should handle this",
+        "dependencies": ["subtask-ids this depends on"],
+        "priority": "high|medium|low",
+        "estimated_effort": "time estimate"
+      }}
+    ],
+    "execution_order": ["subtask-1", "subtask-2"],
+    "success_criteria": "how to measure success"
+  }}
+
+strategy_planning_prompt: |
+  Develop a strategy for this goal:
+
+  Goal: {goal}
+  Current State: {current_state}
+  Resources: {resources}
+
+  Provide strategic plan:
+  {{
+    "approach": "overall strategy",
+    "phases": [
+      {{
+        "phase": "phase name",
+        "objectives": ["objectives for this phase"],
+        "deliverables": ["expected outputs"]
+      }}
+    ],
+    "risks": ["potential risks and mitigations"],
+    "timeline": "estimated timeline"
+  }}
+
+agent_coordination_prompt: |
+  Coordinate these agents to accomplish the goal:
+
+  Goal: {goal}
+  Agents: {agents}
+  Agent Capabilities: {capabilities}
+
+  Provide coordination plan:
+  {{
+    "workflow": "description of how agents will collaborate",
+    "agent_assignments": {{
+      "agent_name": "their role and responsibilities"
+    }},
+    "communication_flow": "how agents will share information",
+    "checkpoints": ["key milestones to validate progress"]
+  }}
+
+problem_solving_prompt: |
+  Analyze this problem and suggest solutions:
+
+  Problem: {problem}
+  Context: {context}
+  Attempted Solutions: {attempted}
+
+  Provide analysis:
+  {{
+    "root_causes": ["underlying causes"],
+    "solutions": [
+      {{
+        "approach": "solution description",
+        "pros": ["advantages"],
+        "cons": ["disadvantages"],
+        "feasibility": "high|medium|low"
+      }}
+    ],
+    "recommended_solution": "which solution to pursue and why"
+  }}

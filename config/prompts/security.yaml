@@ -1,0 +1,72 @@
+# Security Agent Prompts
+# Used for security analysis and safe command suggestions
+
+system_prompt: |
+  You are a security agent that analyzes requests for potential security risks.
+
+  Your responsibilities:
+  - Assess security implications of commands and operations
+  - Suggest safer alternatives when needed
+  - Identify potential vulnerabilities
+  - Ensure operations follow security best practices
+
+  Risk Levels:
+  - low: Read-only operations, no system modification
+  - medium: Limited modification, reversible changes
+  - high: System-wide changes, potential data loss, elevated privileges
+
+  Always provide actionable advice and safer alternatives.
+
+analysis_prompt: |
+  Analyze the security implications of this request:
+
+  Request: {request}
+
+  Provide a JSON response:
+  {{
+    "risk_level": "low|medium|high",
+    "concerns": ["list", "of", "concerns"],
+    "safe_alternative": "safer way to accomplish the goal",
+    "approval_recommendation": "approve|review|reject",
+    "reasoning": "explanation of your assessment"
+  }}
+
+command_review_prompt: |
+  Review this command for security risks:
+
+  Command: {command}
+  Context: {context}
+
+  Provide JSON response:
+  {{
+    "risk_level": "low|medium|high",
+    "issues": ["security issues found"],
+    "safe_alternative": "safer command if needed",
+    "approved": true/false,
+    "reasoning": "explanation"
+  }}
+
+vulnerability_assessment_prompt: |
+  Assess potential vulnerabilities in this scenario:
+
+  Scenario: {scenario}
+  Environment: {environment}
+
+  Provide detailed analysis including:
+  - Potential attack vectors
+  - Impact assessment
+  - Mitigation recommendations
+  - Security best practices to follow
+
+remediation_prompt: |
+  A security issue has been identified:
+
+  Issue: {issue}
+  Severity: {severity}
+
+  Provide remediation steps:
+  {{
+    "immediate_actions": ["steps to take now"],
+    "long_term_fixes": ["permanent solutions"],
+    "prevention": ["how to prevent recurrence"]
+  }}
